@@ -12,7 +12,6 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function VerifyUserPage() {
-  // ▼▼▼ ALL ORIGINAL STATE AND FUNCTIONS REMAIN UNCHANGED ▼▼▼
   const [status, setStatus] = useState("verifying");
   const [message, setMessage] = useState("");
   const [countdown, setCountdown] = useState(10);
@@ -69,29 +68,26 @@ export default function VerifyUserPage() {
     setIsRedirecting(true);
     router.push("/dashboard");
   };
-  // ▲▲▲ ALL ORIGINAL CODE ABOVE REMAINS UNCHANGED ▲▲▲
 
   return (
-    <div className="min-h-screen bg-[#0e0e2c] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Status Card */}
         <div
           className={`rounded-xl overflow-hidden border ${
             status === "success"
               ? "border-[#20c997]/30"
               : status === "error"
               ? "border-[#f06595]/30"
-              : "border-[#a0aec0]/20"
+              : "border-gray-200"
           } shadow-lg`}
         >
-          {/* Header */}
           <div
             className={`p-6 ${
               status === "success"
                 ? "bg-[#20c997]/10"
                 : status === "error"
                 ? "bg-[#f06595]/10"
-                : "bg-[#0e0e2c]"
+                : "bg-white"
             }`}
           >
             <div className="flex justify-center mb-4">
@@ -101,7 +97,7 @@ export default function VerifyUserPage() {
                     ? "bg-[#20c997]/20 text-[#20c997]"
                     : status === "error"
                     ? "bg-[#f06595]/20 text-[#f06595]"
-                    : "bg-[#0e0e2c] text-[#20c997] border border-[#a0aec0]/20"
+                    : "bg-white text-[#20c997] border border-gray-200"
                 }`}
               >
                 {status === "verifying" ? (
@@ -113,40 +109,37 @@ export default function VerifyUserPage() {
                 )}
               </div>
             </div>
-            <h1 className="text-2xl font-semibold text-center text-white">
+            <h1 className="text-2xl font-semibold text-center text-gray-900">
               {status === "verifying" && "Account Verification"}
               {status === "success" && "Verification Complete!"}
               {status === "error" && "Verification Failed"}
             </h1>
           </div>
 
-          {/* Body */}
-          <div className="bg-[#0e0e2c] p-6">
+          <div className="bg-white p-6">
             <p
               className={`text-center mb-6 ${
                 status === "success"
                   ? "text-[#20c997]"
                   : status === "error"
                   ? "text-[#f06595]"
-                  : "text-[#a0aec0]"
+                  : "text-gray-600"
               }`}
             >
               {message}
             </p>
 
-            {/* Verifying State */}
             {status === "verifying" && (
               <div className="space-y-4">
-                <div className="h-1.5 bg-[#a0aec0]/10 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div className="h-full bg-[#20c997] rounded-full animate-pulse w-3/4"></div>
                 </div>
-                <p className="text-xs text-center text-[#a0aec0]">
+                <p className="text-xs text-center text-gray-500">
                   Securely validating your credentials...
                 </p>
               </div>
             )}
 
-            {/* Success State */}
             {status === "success" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-center space-x-2 bg-[#20c997]/10 rounded-lg py-3">
@@ -175,10 +168,9 @@ export default function VerifyUserPage() {
               </div>
             )}
 
-            {/* Error State */}
             {status === "error" && (
               <div className="space-y-6">
-                <div className="text-sm text-[#a0aec0] space-y-2">
+                <div className="text-sm text-gray-700 space-y-2">
                   <p className="font-medium text-[#f06595]">Possible issues:</p>
                   <ul className="space-y-1 pl-4">
                     <li className="list-disc">Expired verification link</li>
@@ -189,7 +181,7 @@ export default function VerifyUserPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => router.push("/login")}
-                    className="py-2 px-4 bg-[#a0aec0]/10 hover:bg-[#a0aec0]/20 text-white rounded-lg transition-colors"
+                    className="py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors"
                   >
                     Back to Login
                   </button>
@@ -204,9 +196,8 @@ export default function VerifyUserPage() {
             )}
           </div>
 
-          {/* Footer */}
-          <div className="px-6 py-3 bg-[#0e0e2c] border-t border-[#a0aec0]/10">
-            <div className="flex items-center justify-center space-x-2 text-xs text-[#a0aec0]">
+          <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
+            <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
               <Shield className="h-3 w-3 text-[#20c997]" />
               <span>Secure verification process</span>
             </div>

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { RefreshCcw } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { RefreshCcw } from "lucide-react";
 
 export default function Captcha({ onVerify }) {
-  const [question, setQuestion] = useState('');
+  const [question, setQuestion] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState(null);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [error, setError] = useState('');
+  const [userAnswer, setUserAnswer] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     generateCaptcha();
@@ -18,8 +18,8 @@ export default function Captcha({ onVerify }) {
     const b = Math.floor(Math.random() * 10) + 1;
     setQuestion(`What is ${a} + ${b}?`);
     setCorrectAnswer(a + b);
-    setUserAnswer('');
-    setError('');
+    setUserAnswer("");
+    setError("");
     onVerify(false); // reset verified state on refresh
   };
 
@@ -28,10 +28,10 @@ export default function Captcha({ onVerify }) {
     setUserAnswer(value);
     const input = parseInt(value, 10);
     if (input === correctAnswer) {
-      setError('');
+      setError("");
       onVerify(true);
     } else {
-      setError('Incorrect answer');
+      setError("Incorrect answer");
       onVerify(false);
     }
   };
@@ -39,10 +39,13 @@ export default function Captcha({ onVerify }) {
   return (
     <div className="mt-4 space-y-2">
       <label className="block text-sm font-medium mb-1">
-        CAPTCHA <span className="text-muted-foreground">(to verify you're human)</span>
+        CAPTCHA{" "}
+        <span className="text-muted-foreground">(to verify you're human)</span>
       </label>
       <div className="flex items-center gap-2">
-        <span className="text-sm bg-muted px-3 py-2 rounded-md font-mono">{question}</span>
+        <span className="text-sm bg-muted px-3 py-2 rounded-md font-mono">
+          {question}
+        </span>
         <button
           type="button"
           onClick={generateCaptcha}
