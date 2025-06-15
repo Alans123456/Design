@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Eye, EyeOff, Lock, User, Shield, Check } from "lucide-react";
+import { Eye, EyeOff, Lock, User, Shield } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 
 // Password Strength Meter Component
@@ -22,7 +22,7 @@ function PasswordStrengthMeter({ strength, feedback }) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center text-white justify-between">
+      <div className="flex items-center justify-between">
         <span className="text-xs text-gray-300">Password Strength</span>
         <span
           className={`text-xs font-medium ${
@@ -59,7 +59,7 @@ function PasswordStrengthMeter({ strength, feedback }) {
   );
 }
 
-// Mock password analysis function
+// Analyze password strength
 const analyzePassword = (password) => {
   const feedback = [];
   let score = 0;
@@ -82,48 +82,38 @@ const analyzePassword = (password) => {
   return { score: Math.min(score, 4), feedback };
 };
 
-// Mock storage functions
+// Dummy check for existing users
 const checkUserExists = (username) => {
   const existingUsers = ["admin", "user", "test"];
   return existingUsers.includes(username.toLowerCase());
 };
 
+// Dummy save user function
 const saveUser = async (username, password, email) => {
-  // Mock save function (in a real app, this would call your backend)
   console.log("User saved:", { username, email });
 };
 
-// Toast notification component
+// Simple toast functions (DOM based)
 const toast = {
   success: (title, options) => {
-    const toastEl = document.createElement("div");
-    toastEl.className =
-      "fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50 shadow-lg";
-    toastEl.innerHTML = `
-      <div class="font-medium">${title}</div>
-      ${
-        options?.description
-          ? `<div class="text-sm">${options.description}</div>`
-          : ""
-      }
-    `;
-    document.body.appendChild(toastEl);
-    setTimeout(() => toastEl.remove(), 4000);
+    const div = document.createElement("div");
+    div.className =
+      "fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow z-50";
+    div.innerHTML = `<strong>${title}</strong><div class="text-sm">${
+      options?.description || ""
+    }</div>`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 4000);
   },
   error: (title, options) => {
-    const toastEl = document.createElement("div");
-    toastEl.className =
-      "fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50 shadow-lg";
-    toastEl.innerHTML = `
-      <div class="font-medium">${title}</div>
-      ${
-        options?.description
-          ? `<div class="text-sm">${options.description}</div>`
-          : ""
-      }
-    `;
-    document.body.appendChild(toastEl);
-    setTimeout(() => toastEl.remove(), 4000);
+    const div = document.createElement("div");
+    div.className =
+      "fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow z-50";
+    div.innerHTML = `<strong>${title}</strong><div class="text-sm">${
+      options?.description || ""
+    }</div>`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 4000);
   },
 };
 
@@ -142,9 +132,9 @@ export default function RegisterForm() {
 
   useEffect(() => {
     if (password) {
-      const analysis = analyzePassword(password);
-      setPasswordStrength(analysis.score);
-      setPasswordFeedback(analysis.feedback);
+      const result = analyzePassword(password);
+      setPasswordStrength(result.score);
+      setPasswordFeedback(result.feedback);
     } else {
       setPasswordStrength(0);
       setPasswordFeedback([]);
@@ -153,24 +143,25 @@ export default function RegisterForm() {
 
   const validateForm = () => {
     const errors = {};
+
     if (!email.trim()) {
       errors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      errors.email = "Please enter a valid email address";
+      errors.email = "Invalid email format";
     }
 
     if (!username.trim()) {
       errors.username = "Username is required";
     } else if (username.length < 4) {
-      errors.username = "Username must be at least 4 characters";
+      errors.username = "Must be at least 4 characters";
     } else if (checkUserExists(username)) {
-      errors.username = "Username already taken";
+      errors.username = "Username already exists";
     }
 
     if (!password) {
       errors.password = "Password is required";
     } else if (passwordStrength < 2) {
-      errors.password = "Please choose a stronger password";
+      errors.password = "Password is too weak";
     }
 
     if (password !== confirmPassword) {
@@ -178,7 +169,7 @@ export default function RegisterForm() {
     }
 
     if (!captchaVerified) {
-      errors.captcha = "Please complete the reCAPTCHA";
+      errors.captcha = "Please verify CAPTCHA";
     }
 
     setFormErrors(errors);
@@ -187,11 +178,9 @@ export default function RegisterForm() {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      if (!captchaVerified) {
-        toast.error("Verification Required", {
-          description: "Please complete the reCAPTCHA before submitting.",
-        });
-      }
+      toast.error("Validation Error", {
+        description: "Please correct the highlighted fields.",
+      });
       return;
     }
 
@@ -199,50 +188,46 @@ export default function RegisterForm() {
 
     try {
       await saveUser(username, password, email);
-      toast.success("Account created successfully", {
-        description: "You can now log in with your credentials.",
+      toast.success("Success", {
+        description: "Your account has been created!",
       });
+
       // Reset form
       setEmail("");
       setUsername("");
       setPassword("");
       setConfirmPassword("");
       setCaptchaVerified(false);
-      recaptchaRef.current.reset();
-    } catch (error) {
-      toast.error("Registration failed", {
-        description: error.message || "An unexpected error occurred.",
+      recaptchaRef.current?.reset();
+    } catch (err) {
+      toast.error("Something went wrong", {
+        description: err.message || "Try again later.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-[#f8fafc] rounded-xl shadow-2xl border border-slate-200">
       <div className="text-center mb-6">
-        <div className="flex justify-center mb-3">
-          <Shield className="h-10 w-10 text-cyan-600" />
-        </div>
+        <Shield className="w-10 h-10 mx-auto text-cyan-600" />
         <h1 className="text-2xl font-bold tracking-tight text-slate-800">
           Create Secure Account
         </h1>
         <p className="text-sm text-slate-500 mt-1">
-          Complete the secure registration process below
+          Please fill in all required fields
         </p>
       </div>
 
       <div className="space-y-4">
+        {/* Email */}
         <div>
           <label className="block text-sm font-medium mb-1 text-slate-700">
             Email
           </label>
           <div className="relative">
-            <User className="absolute inset-y-0 left-3 top-3 h-4 w-4 text-slate-500" />
+            <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
             <input
               type="email"
               value={email}
@@ -250,8 +235,7 @@ export default function RegisterForm() {
               className={`pl-10 w-full h-10 bg-white border ${
                 formErrors.email ? "border-rose-400" : "border-slate-300"
               } rounded-md focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-colors text-slate-800 placeholder-slate-400`}
-              placeholder="Enter your email"
-              autoComplete="email"
+              placeholder="you@example.com"
             />
           </div>
           {formErrors.email && (
@@ -259,12 +243,13 @@ export default function RegisterForm() {
           )}
         </div>
 
+        {/* Username */}
         <div>
           <label className="block text-sm font-medium mb-1 text-slate-700">
             Username
           </label>
           <div className="relative">
-            <User className="absolute inset-y-0 left-3 top-3 h-4 w-4 text-slate-500" />
+            <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
             <input
               type="text"
               value={username}
@@ -273,7 +258,6 @@ export default function RegisterForm() {
                 formErrors.username ? "border-rose-400" : "border-slate-300"
               } rounded-md focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-colors text-slate-800 placeholder-slate-400`}
               placeholder="Choose a username"
-              autoComplete="username"
             />
           </div>
           {formErrors.username && (
@@ -281,12 +265,13 @@ export default function RegisterForm() {
           )}
         </div>
 
+        {/* Password */}
         <div>
           <label className="block text-sm font-medium mb-1 text-slate-700">
             Password
           </label>
           <div className="relative">
-            <Lock className="absolute inset-y-0 left-3 top-3 h-4 w-4 text-slate-500" />
+            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
             <input
               type={showPassword ? "text" : "password"}
               value={password}
@@ -294,19 +279,13 @@ export default function RegisterForm() {
               className={`pl-10 pr-10 w-full h-10 bg-white border ${
                 formErrors.password ? "border-rose-400" : "border-slate-300"
               } rounded-md focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-colors text-slate-800 placeholder-slate-400`}
-              placeholder="Create a strong password"
-              autoComplete="new-password"
+              placeholder="••••••••"
             />
             <button
-              type="button"
-              onClick={toggleShowPassword}
+              onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-2.5 hover:text-slate-600 transition-colors"
             >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-slate-500" />
-              ) : (
-                <Eye className="h-4 w-4 text-slate-500" />
-              )}
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
           {formErrors.password && (
@@ -321,12 +300,13 @@ export default function RegisterForm() {
           />
         )}
 
+        {/* Confirm Password */}
         <div>
           <label className="block text-sm font-medium mb-1 text-slate-700">
             Confirm Password
           </label>
           <div className="relative">
-            <Lock className="absolute inset-y-0 left-3 top-3 h-4 w-4 text-slate-500" />
+            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
             <input
               type={showPassword ? "text" : "password"}
               value={confirmPassword}
@@ -336,8 +316,7 @@ export default function RegisterForm() {
                   ? "border-rose-400"
                   : "border-slate-300"
               } rounded-md focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-colors text-slate-800 placeholder-slate-400`}
-              placeholder="Re-enter your password"
-              autoComplete="new-password"
+              placeholder="Repeat password"
             />
           </div>
           {formErrors.confirmPassword && (
@@ -347,10 +326,11 @@ export default function RegisterForm() {
           )}
         </div>
 
+        {/* reCAPTCHA */}
         <div className="my-4">
           <ReCAPTCHA
             ref={recaptchaRef}
-            sitekey="6LdgfVkrAAAAAAna8O1SFhYz6L_n-yTwNr4Pt3t8" // Test key (replace with yours)
+            sitekey="6LdgfVkrAAAAAAna8O1SFhYz6L_n-yTwNr4Pt3t8" // test sitekey
             onChange={(token) => setCaptchaVerified(!!token)}
           />
           {formErrors.captcha && (
@@ -359,7 +339,6 @@ export default function RegisterForm() {
         </div>
 
         <button
-          type="button"
           onClick={handleSubmit}
           disabled={isSubmitting || !captchaVerified}
           className={`w-full h-10 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-md hover:from-cyan-500 hover:to-blue-500 transition-all duration-200 shadow-lg hover:shadow-cyan-500/25 ${
@@ -370,24 +349,24 @@ export default function RegisterForm() {
         >
           {isSubmitting ? "Creating Account..." : "Create Account"}
         </button>
-      </div>
 
-      <div className="mt-4 text-xs text-black text-center">
-        By creating an account, you agree to our{" "}
-        <a
-          href="#"
-          className="text-cyan-600 hover:text-cyan-500 hover:underline transition-colors"
-        >
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a
-          href="#"
-          className="text-cyan-600 hover:text-cyan-500 hover:underline transition-colors"
-        >
-          Privacy Policy
-        </a>
-        .
+        <div className="mt-4 text-xs text-black text-center">
+          By creating an account, you agree to our{" "}
+          <a
+            href="#"
+            className="text-cyan-600 hover:text-cyan-500 hover:underline transition-colors"
+          >
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a
+            href="#"
+            className="text-cyan-600 hover:text-cyan-500 hover:underline transition-colors"
+          >
+            Privacy Policy
+          </a>
+          .
+        </div>
       </div>
     </div>
   );
